@@ -204,7 +204,7 @@ body {
   border-radius: 50%;
   animation: float 15s infinite ease-in-out;
 }
-
+/* 漂浮顏色 */
 .floating-thing {
   position: absolute;
   font-size: 1.2rem;
@@ -213,6 +213,7 @@ body {
   color: rgba(168, 19, 19, 1);
   text-shadow: 0 0 5px rgba(140, 140, 140, 0.1);
 }  
+
 @keyframes float {
   0%, 100% {
     transform: translateY(0) translateX(0) rotate(0deg);
@@ -690,7 +691,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // 創建漂浮元素
 function createFloatingElements() {
   const numElements = 15;
-  const numThings = 12; // 增加漂浮的數量
+  const numThings = 20; // 增加漂浮的數量
   
   // 創建基本圓形元素
   for (let i = 0; i < numElements; i++) {
@@ -714,6 +715,8 @@ function createFloatingElements() {
   }
   
   // 創建漂浮圖形元素
+  const emojis = ['⚡️', '🥣', '♡']; // 在這裡放入你想要飄的兩個圖案，想加更多也可以直接往後加
+
   for (let i = 0; i < numThings; i++) {
     const element = document.createElement('div');
     const left = Math.random() * 100; // 0% to 100%
@@ -722,12 +725,15 @@ function createFloatingElements() {
     const duration = Math.random() * 10 + 15; // 15s to 25s
     
     element.className = 'floating-thing';
-    element.textContent = '⚡️';
+    
+    // 這行是關鍵：隨機從上面的 emojis 清單選一個出來
+    element.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    
     element.style.left = `${left}%`;
     element.style.top = `${top}%`;
     element.style.animationDelay = `${delay}s`;
     element.style.animationDuration = `${duration}s`;
-    element.style.fontSize = `${Math.random() * 1 + 1.5}rem`;
+    element.style.fontSize = `${Math.random() * 1 + 1}rem`;
     
     floatingBg.appendChild(element);
   }
@@ -1437,7 +1443,7 @@ function hideError() {
   error.classList.add('hidden');
 }
 
-// 獲取語言顏色
+// 獲取語言
 function getLanguageColor(language) {
   if (!language) return 'border-grey-500';
 
