@@ -709,7 +709,7 @@ async function fetchSheetData(isSilent = false) {
     }
 
     localStorage.setItem(CACHE_KEY_TITLE, JSON.stringify(data.titleData));
-    }
+    
 
     // 2. 處理內容資料 (自動覆蓋舊資料)
     if (data.sheet1Data) {
@@ -717,7 +717,7 @@ async function fetchSheetData(isSilent = false) {
     }
     
     localStorage.setItem(CACHE_KEY_SONGS, JSON.stringify(data.sheet1Data));
-    }
+    
 
     hideLoading();
   } catch (err) {
@@ -1358,5 +1358,6 @@ function getLanguageClass(language) {
 </script>
 </body>
 </html>
+
 
 
