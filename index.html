@@ -686,7 +686,7 @@ async function fetchSheetData(isSilent = false) {
       enableDataProxy: true
     };
     
-    const proxyEndpoint = 'https://script.google.com/macros/s/AKfycbyfwpaiE6qcEY5FrFW46giUqsvFcjVrnKsEdlLBkw_A7dO3ThkwOfUQ0aXXj5BCrwsBYA/exec';
+    const proxyEndpoint = 'https://script.google.com/macros/s/AKfycbw4HZekmV2_-9wU-Zz-PpcsPgsUgT2VFzQy93JoC47Mk0igAJDDMAFQDMYuE5Itglor/exec';
     const targetUrl = `${proxyEndpoint}?t=${new Date().getTime()}`;
 
     const response = await fetch(targetUrl);
@@ -708,11 +708,17 @@ async function fetchSheetData(isSilent = false) {
       if (subtitleElement) subtitleElement.textContent = titleObject['副標題'] || '';
     }
 
+    localStorage.setItem(CACHE_KEY_TITLE, JSON.stringify(data.titleData));
+    }
+
     // 2. 處理內容資料 (自動覆蓋舊資料)
     if (data.sheet1Data) {
       processSheetData(data.sheet1Data);
     }
     
+    localStorage.setItem(CACHE_KEY_SONGS, JSON.stringify(data.sheet1Data));
+    }
+
     hideLoading();
   } catch (err) {
     console.error('[DataService] Sync failed:', err);
@@ -743,6 +749,9 @@ window.addEventListener('scroll', () => {
 window.addEventListener('DOMContentLoaded', () => {
   fetchSheetData(false);
 });
+
+
+  
 
 // 處理數據
 function processSheetData(data) {
@@ -1349,4 +1358,5 @@ function getLanguageClass(language) {
 </script>
 </body>
 </html>
+
 
