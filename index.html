@@ -530,6 +530,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupEventListeners();
 });
 
+
 // 初始化函數：實作「快取優先」策略
 function init() {
     const cachedSongs = localStorage.getItem(CACHE_KEY_SONGS);
@@ -539,18 +540,21 @@ function init() {
         updateTitleUI(JSON.parse(cachedTitle));
     }
 
+    let hasCache = false;
+
     if (cachedSongs) {
         // 如果有快取，立即渲染，不顯示全屏 Loading
         const data = JSON.parse(cachedSongs);
         processSheetData(data);
         hideLoading(); 
+        hasCache = true;
     } else {
         // 沒有快取才顯示全屏 Loading
         showLoading();
     }
 
-    // 無論有無快取，都在背景抓取最新資料
-    fetchSheetData();
+    // 將 hasCache 傳進去，如果有快取就會以靜默(true)方式在背景更新
+    fetchSheetData(hasCache);
 }
 
 // 創建漂浮元素
@@ -665,6 +669,11 @@ function updateTitleUI(titleDataArray) {
     }
 }
 
+// --- 智慧更新設定 ---
+let lastUpdateTimestamp = 0; // 記錄上次成功的更新時間
+const UPDATE_COOLDOWN = 2 * 60 * 1000; // 2 分鐘 (毫秒)
+
+// 獲取試算表數據 (新增 isSilent 參數，判斷是否為背景靜默更新)
 async function fetchSheetData(isSilent = false) {
   // 如果不是靜默更新，才顯示讀取中動畫
   if (!isSilent) {
@@ -681,7 +690,7 @@ async function fetchSheetData(isSilent = false) {
       enableDataProxy: true
     };
     
-    const proxyEndpoint = 'https://script.google.com/macros/s/AKfycbw4HZekmV2_-9wU-Zz-PpcsPgsUgT2VFzQy93JoC47Mk0igAJDDMAFQDMYuE5Itglor/exec';
+    const proxyEndpoint = 'https://script.google.com/macros/s/AKfycbyfwpaiE6qcEY5FrFW46giUqsvFcjVrnKsEdlLBkw_A7dO3ThkwOfUQ0aXXj5BCrwsBYA/exec';
     const targetUrl = `${proxyEndpoint}?t=${new Date().getTime()}`;
 
     const response = await fetch(targetUrl);
@@ -702,7 +711,7 @@ async function fetchSheetData(isSilent = false) {
       const subtitleElement = document.querySelector('.subtitle');
       if (subtitleElement) subtitleElement.textContent = titleObject['副標題'] || '';
       
-      // 將標題資料寫入快取
+
       localStorage.setItem(CACHE_KEY_TITLE, JSON.stringify(data.titleData));
     }
 
@@ -710,10 +719,10 @@ async function fetchSheetData(isSilent = false) {
     if (data.sheet1Data) {
       processSheetData(data.sheet1Data);
       
-      // 將歌曲資料寫入快取
+
       localStorage.setItem(CACHE_KEY_SONGS, JSON.stringify(data.sheet1Data));
     }
-    
+
     hideLoading();
   } catch (err) {
     console.error('[DataService] Sync failed:', err);
@@ -724,6 +733,21 @@ async function fetchSheetData(isSilent = false) {
     }
   }
 }
+
+// 偵測是否需要更新的邏輯
+function checkForUpdate() {
+  const now = Date.now();
+  // 如果從未更新過，或距離上次更新超過 2 分鐘
+  if (lastUpdateTimestamp !== 0 && (now - lastUpdateTimestamp > UPDATE_COOLDOWN)) {
+    console.log("[AutoSync] 偵測到活動且冷卻結束，啟動背景更新...");
+    fetchSheetData(true); // 傳入 true，代表靜默更新，不轉圈圈
+  }
+}
+
+// 監聽行為：使用者滑動網頁時
+window.addEventListener('scroll', () => {
+  checkForUpdate();
+}, { passive: true });
 
 
   
@@ -1333,6 +1357,7 @@ function getLanguageClass(language) {
 </script>
 </body>
 </html>
+
 
 
 
